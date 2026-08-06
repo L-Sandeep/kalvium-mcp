@@ -23,3 +23,17 @@ livebooks.html
 
 # Windows
 Thumbs.db
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
+
+# Virtual environment
+.venv/
+
+# Playwright profile
+profiles/
+
+# Development files
+samples/
