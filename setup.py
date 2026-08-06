@@ -189,20 +189,24 @@ def claude_config_file() -> Path:
 
 
 def claude_desktop_is_installed(config_file: Path) -> bool:
-    """Return whether Claude Desktop installation data or executable is present."""
-    if config_file.parent.is_dir():
-        return True
+    """Ensure Claude Desktop's configuration directory and config file are usable."""
+    config_directory = config_file.parent
+    try:
+        config_directory.mkdir(parents=True, exist_ok=True)
+        next(config_directory.iterdir(), None)
 
-    if sys.platform == "win32":
-        executable_locations = [
-            Path(os.environ.get("LOCALAPPDATA", "")) / "Programs" / "claude" / "Claude.exe",
-            Path(os.environ.get("PROGRAMFILES", "")) / "Claude" / "Claude.exe",
-        ]
-        return any(location.is_file() for location in executable_locations)
+        if not config_file.exists():
+            write_claude_config(config_file, {"mcpServers": {}})
+        elif not config_file.is_file():
+            raise SetupError(
+                f"Claude Desktop config path is not a file: {config_file}"
+            )
+    except OSError as exc:
+        raise SetupError(
+            f"Cannot create or access Claude Desktop configuration directory: {config_directory}"
+        ) from exc
 
-    if sys.platform == "darwin":
-        return Path("/Applications/Claude.app").is_dir()
-    return False
+    return True
 
 
 def check_claude_desktop(config_file: Path) -> None:
