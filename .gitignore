@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.pyc
+
+# Virtual environment
+.venv/
+
+# Playwright session
+playwright-profile/
+
+# Generated files
+debug.png
+course.html
+dashboard.html
+lesson.html
+lesson.md
+livebooks.html
+
+# IDE
+.vscode/
+.idea/
+
+# Windows
+Thumbs.db
