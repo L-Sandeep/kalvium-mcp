@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "kalvium-mcp"
+version = "1.0.0"
+description = "An MCP server that allows Claude Desktop to access authenticated Kalvium Livebooks."
+readme = "README.md"
+requires-python = ">=3.11"
+
+authors = [
+    { name = "L-Sandeep", email = "sandeep.l.s.140@kalvium.community" }
+]
+
+dependencies = [
+    "beautifulsoup4",
+    "fastmcp",
+    "markdownify",
+    "playwright",
+    "pydantic",
+]
+
+[tool.setuptools]
+py-modules = [
+    "auth",
+    "browser",
+    "markdown",
+    "scraper",
+    "server",
+    "tools",
+]

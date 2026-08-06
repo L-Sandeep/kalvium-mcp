@@ -1,8 +1,9 @@
+from auth import ensure_profile_directory
 from playwright.sync_api import sync_playwright
 
 with sync_playwright() as p:
     browser = p.chromium.launch_persistent_context(
-        user_data_dir="./playwright-profile",
+        user_data_dir=str(ensure_profile_directory()),
         channel="chrome",
         headless=False,
     )

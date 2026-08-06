@@ -6,6 +6,7 @@ __pycache__/
 .venv/
 
 # Playwright session
+profiles/default/
 playwright-profile/
 
 # Generated files
