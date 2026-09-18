@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 
-import setup
+import installer
 
 
 @dataclass(frozen=True)
@@ -19,36 +19,36 @@ class VerificationFailure:
 def check_python_version() -> VerificationFailure | None:
     """Validate the active Python version using the installer check."""
     try:
-        setup.check_python_version()
-    except setup.SetupError as exc:
+        installer.check_python_version()
+    except installer.SetupError as exc:
         return VerificationFailure(str(exc), "Install a supported Python version, then recreate .venv.")
     return None
 
 
 def check_pip() -> VerificationFailure | None:
     """Verify that pip is available without attempting installation."""
-    if setup.pip_is_available():
-        setup.success("pip available")
+    if installer.pip_is_available():
+        installer.success("pip available")
         return None
-    return VerificationFailure("pip is not available.", "Run:\n\npython setup.py")
+    return VerificationFailure("pip is not available.", "Run:\n\npython installer.py")
 
 
 def check_dependencies() -> list[VerificationFailure]:
     """Verify FastMCP, Playwright, and the remaining project dependencies."""
-    missing_packages = set(setup.check_project_packages())
+    missing_packages = set(installer.check_project_packages())
     failures: list[VerificationFailure] = []
 
     if "fastmcp" in missing_packages:
-        failures.append(VerificationFailure("FastMCP is not installed.", "Run:\n\npython setup.py"))
+        failures.append(VerificationFailure("FastMCP is not installed.", "Run:\n\npython installer.py"))
     if "playwright" in missing_packages:
-        failures.append(VerificationFailure("Playwright is not installed.", "Run:\n\npython setup.py"))
+        failures.append(VerificationFailure("Playwright is not installed.", "Run:\n\npython installer.py"))
 
     other_missing = sorted(missing_packages - {"fastmcp", "playwright"})
     if other_missing:
         failures.append(
             VerificationFailure(
                 f"Required Python dependencies are missing: {', '.join(other_missing)}.",
-                "Run:\n\npython setup.py",
+                "Run:\n\npython installer.py",
             )
         )
     return failures
@@ -56,24 +56,24 @@ def check_dependencies() -> list[VerificationFailure]:
 
 def check_chromium() -> VerificationFailure | None:
     """Verify Playwright Chromium using the installer check."""
-    if setup.check_chromium():
+    if installer.check_chromium():
         return None
-    return VerificationFailure("Chromium is not installed.", "Run:\n\npython setup.py")
+    return VerificationFailure("Chromium is not installed.", "Run:\n\npython installer.py")
 
 
 def check_claude_desktop() -> tuple[Path | None, VerificationFailure | None]:
     """Verify that Claude Desktop is installed and return its config path."""
     try:
-        config_file = setup.claude_config_file()
-    except setup.SetupError as exc:
-        return None, VerificationFailure(str(exc), "Install Claude Desktop, then run:\n\npython setup.py")
+        config_file = installer.claude_config_file()
+    except installer.SetupError as exc:
+        return None, VerificationFailure(str(exc), "Install Claude Desktop, then run:\n\npython installer.py")
 
-    if setup.claude_desktop_is_installed(config_file):
-        setup.success("Claude Desktop detected")
+    if installer.claude_desktop_is_installed(config_file):
+        installer.success("Claude Desktop detected")
         return config_file, None
     return None, VerificationFailure(
         "Claude Desktop is not installed.",
-        "Install and open Claude Desktop once, then run:\n\npython setup.py",
+        "Install and open Claude Desktop once, then run:\n\npython installer.py",
     )
 
 
@@ -84,34 +84,34 @@ def check_claude_config(config_file: Path | None) -> tuple[dict | None, Verifica
     if not config_file.is_file():
         return None, VerificationFailure(
             "Claude Desktop config file is missing.",
-            "Run:\n\npython setup.py",
+            "Run:\n\npython installer.py",
         )
 
     try:
-        return setup.load_claude_config(config_file), None
-    except setup.SetupError as exc:
-        return None, VerificationFailure(str(exc), "Fix the configuration, then run:\n\npython setup.py")
+        return installer.load_claude_config(config_file), None
+    except installer.SetupError as exc:
+        return None, VerificationFailure(str(exc), "Fix the configuration, then run:\n\npython installer.py")
 
 
 def check_mcp_registration(config: dict | None) -> VerificationFailure | None:
     """Verify the Kalvium MCP registration using the installer check."""
     if config is None:
         return None
-    if setup.check_mcp_installation(config):
+    if installer.check_mcp_installation(config):
         return None
     return VerificationFailure(
         "Kalvium MCP is not registered with Claude Desktop.",
-        "Run:\n\npython setup.py",
+        "Run:\n\npython installer.py",
     )
 
 
 def check_browser_profile() -> VerificationFailure | None:
     """Verify the non-empty default browser profile using the installer check."""
-    if setup.check_browser_profile():
+    if installer.check_browser_profile():
         return None
     return VerificationFailure(
         "Kalvium browser profile is missing or empty.",
-        "Run:\n\npython setup.py",
+        "Run:\n\npython installer.py",
     )
 
 
@@ -155,7 +155,7 @@ def main() -> int:
         return 1
 
     print()
-    setup.success("Everything looks good.")
+    installer.success("Everything looks good.")
     print("\nYou can now open Claude Desktop.")
     print("\nSuggested first prompt:\n")
     print("List my livebooks")
@@ -164,3 +164,6 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
+
+

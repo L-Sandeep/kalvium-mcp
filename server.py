@@ -1,14 +1,17 @@
-"""FastMCP server exposing authenticated, read-only Kalvium Livebook tools."""
+"""FastMCP server exposing authenticated, read-only Kalvium tools."""
 
 import logging
 
 from fastmcp import FastMCP
 
 from tools import (
+    assessments,
+    attendance,
     get_lesson,
     hello,
     list_lessons,
     list_livebooks,
+    schedule,
 )
 
 logging.basicConfig(level=logging.INFO)
@@ -20,7 +23,9 @@ mcp.tool()(list_livebooks)
 mcp.tool()(list_lessons)
 mcp.tool()(get_lesson)
 mcp.tool()(hello)
-
+mcp.tool()(attendance)
+mcp.tool()(assessments)
+mcp.tool()(schedule)
 
 def main() -> None:
     """Run the server over the standard MCP stdio transport."""

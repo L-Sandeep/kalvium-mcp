@@ -13,6 +13,7 @@ from playwright.sync_api import (
     sync_playwright,
 )
 
+
 PROJECT_DIRECTORY = Path(__file__).resolve().parent
 PROFILE_DIRECTORY = PROJECT_DIRECTORY / "profiles" / "default"
 LEGACY_PROFILE_DIRECTORY = PROJECT_DIRECTORY / "playwright-profile"
@@ -25,7 +26,8 @@ def ensure_profile_directory() -> Path:
     if PROFILE_DIRECTORY.exists():
         if not PROFILE_DIRECTORY.is_dir():
             raise NotADirectoryError(
-                f"Default Playwright profile path is not a directory: {PROFILE_DIRECTORY}"
+                f"Default Playwright profile path is not a directory: "
+                f"{PROFILE_DIRECTORY}"
             )
         return PROFILE_DIRECTORY
 
@@ -35,7 +37,9 @@ def ensure_profile_directory() -> Path:
                 "Legacy Playwright profile path is not a directory: "
                 f"{LEGACY_PROFILE_DIRECTORY}"
             )
+
         LEGACY_PROFILE_DIRECTORY.rename(PROFILE_DIRECTORY)
+
     else:
         PROFILE_DIRECTORY.mkdir()
 
@@ -45,16 +49,23 @@ def ensure_profile_directory() -> Path:
 def first_time_login() -> None:
     """Open Kalvium in the persistent profile and wait for an interactive login."""
     profile_directory = ensure_profile_directory()
+
     playwright: Playwright = sync_playwright().start()
     context: BrowserContext | None = None
+
     try:
         context = playwright.chromium.launch_persistent_context(
             user_data_dir=str(profile_directory),
             channel="chrome",
             headless=False,
         )
+
         page = context.pages[0] if context.pages else context.new_page()
-        page.goto("https://app.kalvium.community", wait_until="domcontentloaded")
+
+        page.goto(
+            "https://app.kalvium.community",
+            wait_until="domcontentloaded",
+        )
 
         print("----------------------------------")
         print("Kalvium Login Required")
@@ -70,23 +81,32 @@ def first_time_login() -> None:
             raise RuntimeError("Login was not completed.")
 
         print("\u2713 Login successful")
+
     finally:
         if context is not None:
-            context.close()
-        playwright.stop()
+            try:
+                context.close()
+            except PlaywrightError:
+                pass
+
+        try:
+            playwright.stop()
+        except PlaywrightError:
+            pass
 
 
 @contextmanager
 def open_browser() -> Iterator[tuple[BrowserContext, Page]]:
-    """Open the existing authenticated Chrome profile and yield its context and page.
+    """Open the existing authenticated Chrome profile.
 
-    The function never performs login or modifies authentication state.  Closing the
-    context and Playwright instance on exit releases the profile lock cleanly.
+    This function never performs login or modifies authentication state.
     """
+
     profile_directory = ensure_profile_directory()
 
     playwright: Playwright = sync_playwright().start()
     context: BrowserContext | None = None
+
     try:
         try:
             context = playwright.chromium.launch_persistent_context(
@@ -94,16 +114,30 @@ def open_browser() -> Iterator[tuple[BrowserContext, Page]]:
                 channel="chrome",
                 headless=False,
             )
+
         except PlaywrightError as exc:
             if "existing browser session" in str(exc):
                 raise RuntimeError(
                     "The Playwright profile is already open. Close every Chrome "
                     f"window using {profile_directory} before starting the MCP server."
                 ) from exc
-            raise RuntimeError("Chrome could not be launched with the Playwright profile.") from exc
+
+            raise RuntimeError(
+                "Chrome could not be launched with the Playwright profile."
+            ) from exc
+
         page = context.pages[0] if context.pages else context.new_page()
+
         yield context, page
+
     finally:
         if context is not None:
-            context.close()
-        playwright.stop()
+            try:
+                context.close()
+            except PlaywrightError:
+                pass
+
+        try:
+            playwright.stop()
+        except PlaywrightError:
+            pass

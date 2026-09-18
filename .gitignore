@@ -37,3 +37,10 @@ profiles/
 
 # Development files
 samples/
+
+# Temporary development/debug files
+dev/
+inspect_*.py
+save_*.py
+test_attendance_*.py
+*.html
